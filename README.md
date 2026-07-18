@@ -18,6 +18,17 @@ A lightweight, production-quality, zero-maintenance desktop calendar dashboard f
 
 ---
 
+## Prerequisites
+
+Before setting up the dashboard, ensure you have the following installed on your system:
+
+1.  **Rainmeter**: Desktop customization tool for Windows.
+    - [Download Rainmeter (Standard Installer)](https://www.rainmeter.net/)
+2.  **Python 3**: Scripting language used to run the fetcher.
+    - [Download Python 3](https://www.python.org/downloads/) *(Ensure you check **"Add Python to PATH"** during installation)*.
+
+---
+
 ## Installation & Setup
 
 We have packaged a single-click installer that auto-detects your system configuration:
