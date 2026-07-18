@@ -1,0 +1,61 @@
+{
+  "last_updated": "2026-07-18T20:48:00+05:30",
+  "contests": [
+    {
+      "id": "lc-148-biweekly",
+      "platform": "leetcode",
+      "name": "Biweekly Contest 148",
+      "start_time": "2026-07-18T20:00:00+05:30",
+      "duration": 5400
+    },
+    {
+      "id": "lc-432-weekly",
+      "platform": "leetcode",
+      "name": "Weekly Contest 432",
+      "start_time": "2026-07-19T08:00:00+05:30",
+      "duration": 5400
+    },
+    {
+      "id": "cf-995-div3",
+      "platform": "codeforces",
+      "name": "Codeforces Round 995 (Div. 3)",
+      "start_time": "2026-07-19T20:05:00+05:30",
+      "duration": 7200
+    },
+    {
+      "id": "cf-996-div2",
+      "platform": "codeforces",
+      "name": "Codeforces Round 996 (Div. 2)",
+      "start_time": "2026-07-25T17:35:00+05:30",
+      "duration": 7200
+    },
+    {
+      "id": "lc-433-weekly",
+      "platform": "leetcode",
+      "name": "Weekly Contest 433",
+      "start_time": "2026-07-26T08:00:00+05:30",
+      "duration": 5400
+    },
+    {
+      "id": "lc-149-biweekly",
+      "platform": "leetcode",
+      "name": "Biweekly Contest 149",
+      "start_time": "2026-08-01T20:00:00+05:30",
+      "duration": 5400
+    },
+    {
+      "id": "cf-997-div1",
+      "platform": "codeforces",
+      "name": "Codeforces Round 997 (Div. 1)",
+      "start_time": "2026-08-01T20:00:00+05:30",
+      "duration": 7200
+    },
+    {
+      "id": "cf-998-div2",
+      "platform": "codeforces",
+      "name": "Codeforces Round 998 (Div. 2)",
+      "start_time": "2026-08-05T20:05:00+05:30",
+      "duration": 7200
+    }
+  ]
+}
