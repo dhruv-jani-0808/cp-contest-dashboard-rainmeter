@@ -1,8 +1,8 @@
-# CP Dashboard (Rainmeter)
+# CP Contest Calendar (Rainmeter)
 
 > **Note**: This is a perfectly vibe coded project, created because I was facing problems remembering contest dates. 🚀
 
-A lightweight, production-quality, zero-maintenance desktop dashboard for Competitive Programming that displays upcoming contests from **Codeforces** and **LeetCode**.
+A lightweight, production-quality, zero-maintenance desktop calendar dashboard for Competitive Programming that displays upcoming contests from **Codeforces** and **LeetCode**.
 
 ---
 
@@ -20,27 +20,17 @@ A lightweight, production-quality, zero-maintenance desktop dashboard for Compet
 
 ## Installation & Setup
 
-### Step 1: Copy the Rainmeter Skin
-1. Copy the `rainmeter` folder from this repository into your Rainmeter Skins directory (typically `C:\Users\Dhruv\OneDrive\Documents\Rainmeter\Skins\`).
-2. Rename that folder to `CPDashboard`.
+We have packaged a single-click installer that auto-detects your system configuration:
 
-### Step 2: Configure Paths
-Open `variables.inc` inside your `Skins\CPDashboard\` directory and verify the paths to Python and the script entry point:
-```ini
-PythonPath=python
-FetcherPath=D:\Projects\CPDashboard\fetch\fetch_contests.py
-```
+1.  **Clone or download** this repository to the path: `D:\Projects\CPDashboard\`
+2.  Open the folder in Windows Explorer and double-click **`setup.bat`**.
 
-### Step 3: Run the Python Fetcher
-Run the Python script once in your terminal to generate the initial `contest.json` database:
-```bash
-python D:\Projects\CPDashboard\fetch\fetch_contests.py
-```
-
-### Step 4: Load the Skin
-1. Right-click the Rainmeter system tray icon and click **Manage**.
-2. Click **Refresh all** in the bottom-left corner.
-3. Select `CPDashboard` -> `CPDashboard.ini` and click **Load** in the top-right.
+*That's it!* The installer will automatically:
+- Find your active Rainmeter skins folder (including OneDrive redirected paths).
+- Deploy the files to `Skins\CPDashboard`.
+- Auto-resolve your Python executable path and write it to variables.
+- Run the python fetcher once to compile the database.
+- Refresh Rainmeter and load the skin directly onto your desktop.
 
 ---
 
