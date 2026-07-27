@@ -1,6 +1,6 @@
 -- CP Dashboard Lua Controller
 -- Handles dynamic JSON parsing, week-aligned calendar shifting, contest list formatting,
--- time-based contest expiration, scrolling, and platform filter checkboxes.
+-- time-based contest expiration, scrolling (up to 4 items visible), and visual checkbox styling.
 
 local scrollOffset = 0
 
@@ -26,7 +26,7 @@ function ScrollDown()
     local list_contests = get_list_contests(active_contests)
     
     local total_contests = #list_contests
-    local maxOffset = math.max(0, total_contests - 6)
+    local maxOffset = math.max(0, total_contests - 4)
     
     if scrollOffset < maxOffset then
         scrollOffset = scrollOffset + 1
@@ -57,12 +57,12 @@ function UpdateSkin()
         return
     end
     
-    -- Read filter states from Rainmeter
+    -- Read checkbox states from Rainmeter
     local showCF = tonumber(SKIN:GetVariable('ShowCF')) or 1
     local showLC = tonumber(SKIN:GetVariable('ShowLC')) or 1
     local showGFG = tonumber(SKIN:GetVariable('ShowGFG')) or 1
     
-    -- Centralized checkbox styling based on platform colors
+    -- Update visual styles of the checkboxes (purely standalone UI)
     local cfColor = (showCF == 1) and SKIN:GetVariable('ColorCF') or SKIN:GetVariable('ColorCellDefault')
     local lcColor = (showLC == 1) and SKIN:GetVariable('ColorLC') or SKIN:GetVariable('ColorCellDefault')
     local gfgColor = (showGFG == 1) and SKIN:GetVariable('ColorGFG') or SKIN:GetVariable('ColorCellDefault')
@@ -75,7 +75,7 @@ function UpdateSkin()
     SKIN:Bang('!UpdateMeter', 'MeterLCBox')
     SKIN:Bang('!UpdateMeter', 'MeterGFGBox')
 
-    -- Filter out inactive / completed contests and disabled platforms
+    -- Filter out completed contests
     local active_contests = get_active_contests(data.contests)
     
     local today_time = os.time()
@@ -201,8 +201,8 @@ function UpdateSkin()
     local list_contests = get_list_contests(active_contests)
     local total_contests = #list_contests
     
-    -- Clamp scrollOffset to valid bounds
-    local maxOffset = math.max(0, total_contests - 6)
+    -- Clamp scrollOffset to valid bounds for a 4-item capacity
+    local maxOffset = math.max(0, total_contests - 4)
     if scrollOffset > maxOffset then
         scrollOffset = maxOffset
     end
@@ -210,7 +210,7 @@ function UpdateSkin()
         scrollOffset = 0
     end
     
-    local num_contests_to_show = math.min(6, total_contests - scrollOffset)
+    local num_contests_to_show = math.min(4, total_contests - scrollOffset)
     local empty_mode = (total_contests == 0)
     
     if empty_mode then
@@ -236,8 +236,8 @@ function UpdateSkin()
         scrollOffset = 0
     end
     
-    -- We support up to 6 meters in INI
-    local max_meters = 6
+    -- We support up to 4 visible meters in INI now
+    local max_meters = 4
     for i = 1, max_meters do
         local iconMeter = string.format("MeterC%dIcon", i)
         local nameMeter = string.format("MeterC%dName", i)
@@ -290,20 +290,10 @@ end
 
 function get_active_contests(contests)
     local current_time = os.time()
-    local showCF = tonumber(SKIN:GetVariable('ShowCF')) or 1
-    local showLC = tonumber(SKIN:GetVariable('ShowLC')) or 1
-    local showGFG = tonumber(SKIN:GetVariable('ShowGFG')) or 1
-    
     local active = {}
     for _, contest in ipairs(contests) do
-        local show = false
-        if contest.platform == "leetcode" and showLC == 1 then show = true
-        elseif contest.platform == "codeforces" and showCF == 1 then show = true
-        elseif contest.platform == "gfg" and showGFG == 1 then show = true
-        end
-        
         -- Time-based Expiration: check if current_time <= start_time + duration
-        if show and (current_time <= (contest.timestamp + contest.duration)) then
+        if current_time <= (contest.timestamp + contest.duration) then
             table.insert(active, contest)
         end
     end

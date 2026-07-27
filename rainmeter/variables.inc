@@ -21,7 +21,7 @@ FontCode=Consolas
 
 ; Spacing & Dimensions
 SkinWidth=320
-SkinHeight=580
+SkinHeight=510
 Padding=16
 
 ; Grid settings
