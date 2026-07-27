@@ -9,6 +9,7 @@ ColorTextSecondary=139,148,158
 ; Contest State Colors
 ColorCF=88,166,255
 ColorLC=240,136,62
+ColorGFG=48,142,77
 ColorYellow=210,153,34
 ColorPurple=188,140,255
 ColorCellDefault=33,38,45
@@ -20,7 +21,7 @@ FontCode=Consolas
 
 ; Spacing & Dimensions
 SkinWidth=320
-SkinHeight=540
+SkinHeight=580
 Padding=16
 
 ; Grid settings
@@ -31,3 +32,8 @@ GridColumns=7
 ; External Program Paths (For Phase 7 manual refresh)
 PythonPath=python
 FetcherPath=D:\Projects\CPDashboard\fetch\fetch_contests.py
+
+; Platform Filter States (1 = Checked/Show, 0 = Unchecked/Hide)
+ShowLC=1
+ShowGFG=1
+ShowCF=1

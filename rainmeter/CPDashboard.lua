@@ -1,12 +1,44 @@
 -- CP Dashboard Lua Controller
--- Handles dynamic JSON parsing, week-aligned calendar shifting, and contest list formatting.
+-- Handles dynamic JSON parsing, week-aligned calendar shifting, contest list formatting,
+-- time-based contest expiration, scrolling, and platform filter checkboxes.
+
+local scrollOffset = 0
 
 function Initialize()
+    scrollOffset = 0
     UpdateSkin()
 end
 
 function Update()
     -- No continuous updates on every tick. The skin remains static.
+end
+
+function ScrollDown()
+    local currentPath = SKIN:GetVariable('CURRENTPATH')
+    local jsonPath = currentPath .. 'contest.json'
+    local jsonStr = read_file(jsonPath)
+    if not jsonStr then return end
+    
+    local data = parse_json(jsonStr)
+    if not data then return end
+    
+    local active_contests = get_active_contests(data.contests)
+    local list_contests = get_list_contests(active_contests)
+    
+    local total_contests = #list_contests
+    local maxOffset = math.max(0, total_contests - 6)
+    
+    if scrollOffset < maxOffset then
+        scrollOffset = scrollOffset + 1
+        UpdateSkin()
+    end
+end
+
+function ScrollUp()
+    if scrollOffset > 0 then
+        scrollOffset = scrollOffset - 1
+        UpdateSkin()
+    end
 end
 
 function UpdateSkin()
@@ -24,6 +56,27 @@ function UpdateSkin()
         print("CPDashboard.lua: Failed to parse contest.json.")
         return
     end
+    
+    -- Read filter states from Rainmeter
+    local showCF = tonumber(SKIN:GetVariable('ShowCF')) or 1
+    local showLC = tonumber(SKIN:GetVariable('ShowLC')) or 1
+    local showGFG = tonumber(SKIN:GetVariable('ShowGFG')) or 1
+    
+    -- Centralized checkbox styling based on platform colors
+    local cfColor = (showCF == 1) and SKIN:GetVariable('ColorCF') or SKIN:GetVariable('ColorCellDefault')
+    local lcColor = (showLC == 1) and SKIN:GetVariable('ColorLC') or SKIN:GetVariable('ColorCellDefault')
+    local gfgColor = (showGFG == 1) and SKIN:GetVariable('ColorGFG') or SKIN:GetVariable('ColorCellDefault')
+    
+    SKIN:Bang('!SetOption', 'MeterCFBox', 'Shape', string.format("Rectangle 0,0,12,12,2 | Fill Color %s | Stroke Color #ColorBorder# | StrokeWidth 1", cfColor))
+    SKIN:Bang('!SetOption', 'MeterLCBox', 'Shape', string.format("Rectangle 0,0,12,12,2 | Fill Color %s | Stroke Color #ColorBorder# | StrokeWidth 1", lcColor))
+    SKIN:Bang('!SetOption', 'MeterGFGBox', 'Shape', string.format("Rectangle 0,0,12,12,2 | Fill Color %s | Stroke Color #ColorBorder# | StrokeWidth 1", gfgColor))
+    
+    SKIN:Bang('!UpdateMeter', 'MeterCFBox')
+    SKIN:Bang('!UpdateMeter', 'MeterLCBox')
+    SKIN:Bang('!UpdateMeter', 'MeterGFGBox')
+
+    -- Filter out inactive / completed contests and disabled platforms
+    local active_contests = get_active_contests(data.contests)
     
     local today_time = os.time()
     local today_date = os.date("*t", today_time)
@@ -50,7 +103,7 @@ function UpdateSkin()
             
             -- Find contests on this date
             local date_contests = {}
-            for _, contest in ipairs(data.contests) do
+            for _, contest in ipairs(active_contests) do
                 local c_date = contest.start_time:sub(1, 10)
                 if c_date == cell_iso then
                     table.insert(date_contests, contest)
@@ -145,46 +198,42 @@ function UpdateSkin()
     end
     
     -- 2. POPULATE CONTEST LIST (NEXT 7 DAYS)
-    local today_midnight_time = os.time({
-        year = today_date.year,
-        month = today_date.month,
-        day = today_date.day,
-        hour = 0, min = 0, sec = 0
-    })
-    local seven_days_later_time = today_midnight_time + (8 * 24 * 3600) - 1
+    local list_contests = get_list_contests(active_contests)
+    local total_contests = #list_contests
     
-    -- Filter contests in next 7 days
-    local next_7_days_contests = {}
-    for _, contest in ipairs(data.contests) do
-        if contest.timestamp >= today_midnight_time and contest.timestamp <= seven_days_later_time then
-            table.insert(next_7_days_contests, contest)
-        end
+    -- Clamp scrollOffset to valid bounds
+    local maxOffset = math.max(0, total_contests - 6)
+    if scrollOffset > maxOffset then
+        scrollOffset = maxOffset
+    end
+    if scrollOffset < 0 then
+        scrollOffset = 0
     end
     
-    local num_contests_to_show = #next_7_days_contests
-    local no_contests_mode = false
+    local num_contests_to_show = math.min(6, total_contests - scrollOffset)
+    local empty_mode = (total_contests == 0)
     
-    if num_contests_to_show == 0 then
-        -- Find nearest upcoming contest
+    if empty_mode then
+        -- Find nearest upcoming active contest
         local nearest = nil
-        for _, contest in ipairs(data.contests) do
+        for _, contest in ipairs(active_contests) do
             if contest.timestamp >= today_midnight_time then
                 nearest = contest
                 break
             end
         end
-        no_contests_mode = true
         num_contests_to_show = nearest and 2 or 1
         if nearest then
-            next_7_days_contests = {
+            list_contests = {
                 { id = "empty", platform = "none", name = "No contests in the next 7 days.", timestamp = 0 },
                 nearest
             }
         else
-            next_7_days_contests = {
+            list_contests = {
                 { id = "empty", platform = "none", name = "No contests in the next 7 days.", timestamp = 0 }
             }
         end
+        scrollOffset = 0
     end
     
     -- We support up to 6 meters in INI
@@ -195,7 +244,10 @@ function UpdateSkin()
         local timeMeter = string.format("MeterC%dTime", i)
         
         if i <= num_contests_to_show then
-            local contest = next_7_days_contests[i]
+            local contest = list_contests[i + scrollOffset]
+            if empty_mode then
+                contest = list_contests[i] -- ignore offset in empty/error mode
+            end
             
             if contest.id == "empty" then
                 -- Display empty state text only (hide icon and time subtitle)
@@ -234,6 +286,48 @@ function UpdateSkin()
     end
     
     SKIN:Bang('!Redraw')
+end
+
+function get_active_contests(contests)
+    local current_time = os.time()
+    local showCF = tonumber(SKIN:GetVariable('ShowCF')) or 1
+    local showLC = tonumber(SKIN:GetVariable('ShowLC')) or 1
+    local showGFG = tonumber(SKIN:GetVariable('ShowGFG')) or 1
+    
+    local active = {}
+    for _, contest in ipairs(contests) do
+        local show = false
+        if contest.platform == "leetcode" and showLC == 1 then show = true
+        elseif contest.platform == "codeforces" and showCF == 1 then show = true
+        elseif contest.platform == "gfg" and showGFG == 1 then show = true
+        end
+        
+        -- Time-based Expiration: check if current_time <= start_time + duration
+        if show and (current_time <= (contest.timestamp + contest.duration)) then
+            table.insert(active, contest)
+        end
+    end
+    return active
+end
+
+function get_list_contests(active_contests)
+    local today_time = os.time()
+    local today_date = os.date("*t", today_time)
+    local today_midnight_time = os.time({
+        year = today_date.year,
+        month = today_date.month,
+        day = today_date.day,
+        hour = 0, min = 0, sec = 0
+    })
+    local seven_days_later_time = today_midnight_time + (8 * 24 * 3600) - 1
+    
+    local list = {}
+    for _, contest in ipairs(active_contests) do
+        if contest.timestamp >= today_midnight_time and contest.timestamp <= seven_days_later_time then
+            table.insert(list, contest)
+        end
+    end
+    return list
 end
 
 function format_contest_time(c_time)

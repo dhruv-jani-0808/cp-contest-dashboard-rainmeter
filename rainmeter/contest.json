@@ -1,66 +1,10 @@
 {
-  "last_updated": "2026-07-18T21:29:57.169457+05:30",
+  "last_updated": "2026-07-27T20:40:18.693035+05:30",
   "contests": [
-    {
-      "id": "cf-2244",
-      "platform": "codeforces",
-      "name": "Codeforces Round 1109 (Div. 3)",
-      "start_time": "2026-07-14T20:05:00+05:30",
-      "duration": 8100
-    },
-    {
-      "id": "cf-2245",
-      "platform": "codeforces",
-      "name": "Spectral::Cup 2026 Round 3 (Codeforces Round 1110, Div. 1 + Div. 2)",
-      "start_time": "2026-07-16T20:15:00+05:30",
-      "duration": 9000
-    },
-    {
-      "id": "lc-biweekly-148",
-      "platform": "leetcode",
-      "name": "Biweekly Contest 148",
-      "start_time": "2026-07-18T20:00:00+05:30",
-      "duration": 5400
-    },
-    {
-      "id": "cf-2247",
-      "platform": "codeforces",
-      "name": "Codeforces Round 1111 (Div. 2)",
-      "start_time": "2026-07-18T20:05:00+05:30",
-      "duration": 7200
-    },
-    {
-      "id": "lc-weekly-432",
-      "platform": "leetcode",
-      "name": "Weekly Contest 432",
-      "start_time": "2026-07-19T08:00:00+05:30",
-      "duration": 5400
-    },
-    {
-      "id": "lc-weekly-433",
-      "platform": "leetcode",
-      "name": "Weekly Contest 433",
-      "start_time": "2026-07-26T08:00:00+05:30",
-      "duration": 5400
-    },
-    {
-      "id": "cf-2249",
-      "platform": "codeforces",
-      "name": "Codeforces Round (Div. 1)",
-      "start_time": "2026-07-26T20:05:00+05:30",
-      "duration": 9000
-    },
-    {
-      "id": "cf-2250",
-      "platform": "codeforces",
-      "name": "Codeforces Round (Div. 2)",
-      "start_time": "2026-07-26T20:05:00+05:30",
-      "duration": 9000
-    },
     {
       "id": "cf-2248",
       "platform": "codeforces",
-      "name": "Codeforces Round (Div. 2)",
+      "name": "Codeforces Round 1113 (Div. 2)",
       "start_time": "2026-08-01T17:05:00+05:30",
       "duration": 7200
     },
@@ -79,10 +23,45 @@
       "duration": 5400
     },
     {
+      "id": "cf-2252",
+      "platform": "codeforces",
+      "name": "Codeforces Round (Div. 2)",
+      "start_time": "2026-08-06T20:05:00+05:30",
+      "duration": 7200
+    },
+    {
+      "id": "cf-2253",
+      "platform": "codeforces",
+      "name": "Educational Codeforces Round 193 (Rated for Div. 2)",
+      "start_time": "2026-08-06T20:05:00+05:30",
+      "duration": 7200
+    },
+    {
       "id": "lc-weekly-435",
       "platform": "leetcode",
       "name": "Weekly Contest 435",
       "start_time": "2026-08-09T08:00:00+05:30",
+      "duration": 5400
+    },
+    {
+      "id": "lc-biweekly-150",
+      "platform": "leetcode",
+      "name": "Biweekly Contest 150",
+      "start_time": "2026-08-15T20:00:00+05:30",
+      "duration": 5400
+    },
+    {
+      "id": "lc-weekly-436",
+      "platform": "leetcode",
+      "name": "Weekly Contest 436",
+      "start_time": "2026-08-16T08:00:00+05:30",
+      "duration": 5400
+    },
+    {
+      "id": "lc-weekly-437",
+      "platform": "leetcode",
+      "name": "Weekly Contest 437",
+      "start_time": "2026-08-23T08:00:00+05:30",
       "duration": 5400
     }
   ]
