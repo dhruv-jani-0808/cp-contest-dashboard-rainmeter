@@ -1,6 +1,7 @@
 -- CP Dashboard Lua Controller
 -- Handles dynamic JSON parsing, week-aligned calendar shifting, contest list formatting,
--- time-based contest expiration, scrolling (up to 4 items visible), and visual checkbox styling.
+-- time-based contest expiration, scrolling (up to 4 items visible), visual checkbox styling,
+-- and dual timezone-based daily resets (midnight for GFG, 5:30 AM for LC & CF).
 
 local scrollOffset = 0
 
@@ -43,7 +44,40 @@ end
 
 function UpdateSkin()
     local currentPath = SKIN:GetVariable('CURRENTPATH')
+    local variablesPath = currentPath .. 'variables.inc'
     local jsonPath = currentPath .. 'contest.json'
+    
+    local today_time = os.time()
+    
+    -- DUAL DAILY RESET LOGIC
+    -- 1. LC & CF Reset: boundary is 5:30 AM (subtract 5.5 hours = 19800 seconds)
+    local adjusted_lc_cf_time = today_time - 19800
+    local effective_lc_cf = os.date("%Y-%m-%d", adjusted_lc_cf_time)
+    local last_reset_lc_cf = SKIN:GetVariable('LastResetDateLC_CF') or ""
+    
+    -- 2. GFG Reset: boundary is 12:00 AM midnight (no offset needed)
+    local effective_gfg = os.date("%Y-%m-%d", today_time)
+    local last_reset_gfg = SKIN:GetVariable('LastResetDateGFG') or ""
+    
+    local needs_write = false
+    
+    if last_reset_lc_cf ~= effective_lc_cf then
+        SKIN:Bang('!WriteKeyValue', 'Variables', 'ShowLC', '0', variablesPath)
+        SKIN:Bang('!WriteKeyValue', 'Variables', 'ShowCF', '0', variablesPath)
+        SKIN:Bang('!WriteKeyValue', 'Variables', 'LastResetDateLC_CF', effective_lc_cf, variablesPath)
+        needs_write = true
+    end
+    
+    if last_reset_gfg ~= effective_gfg then
+        SKIN:Bang('!WriteKeyValue', 'Variables', 'ShowGFG', '0', variablesPath)
+        SKIN:Bang('!WriteKeyValue', 'Variables', 'LastResetDateGFG', effective_gfg, variablesPath)
+        needs_write = true
+    end
+    
+    if needs_write then
+        SKIN:Bang('!Refresh')
+        return
+    end
     
     local jsonStr = read_file(jsonPath)
     if not jsonStr then
@@ -77,8 +111,6 @@ function UpdateSkin()
 
     -- Filter out completed contests
     local active_contests = get_active_contests(data.contests)
-    
-    local today_time = os.time()
     local today_date = os.date("*t", today_time)
     
     -- Calculate Monday of the current week (Sun=1, Mon=2, ..., Sat=7)

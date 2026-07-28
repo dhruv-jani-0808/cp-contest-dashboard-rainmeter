@@ -37,3 +37,7 @@ FetcherPath=D:\Projects\CPDashboard\fetch\fetch_contests.py
 ShowLC=1
 ShowGFG=1
 ShowCF=1
+
+; Autoreset Timestamps (Tracks last date reset was applied)
+LastResetDateLC_CF=
+LastResetDateGFG=
