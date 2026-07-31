@@ -178,7 +178,7 @@ function UpdateSkin()
                         end
                         if same_time then break end
                     end
-                    state = same_time and "purple" or "yellow"
+                    state = same_time and "purple" or "green"
                 elseif has_cf then
                     state = "cf"
                 else
@@ -197,8 +197,8 @@ function UpdateSkin()
             elseif state == "leetcode" or state == "lc" then
                 fillColor = SKIN:GetVariable('ColorLC')
                 textColor = "13,17,23"
-            elseif state == "yellow" then
-                fillColor = SKIN:GetVariable('ColorYellow')
+            elseif state == "green" then
+                fillColor = SKIN:GetVariable('ColorGreen')
                 textColor = "13,17,23"
             elseif state == "purple" then
                 fillColor = SKIN:GetVariable('ColorPurple')
