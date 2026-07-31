@@ -1,4 +1,4 @@
-# CP Contest Calendar (Rainmeter)
+# CP Contest Calendar (Rainmeter) - Version 2.0
 
 > **Note**: This is a perfectly vibe coded project, created because I was facing problems remembering contest dates. 🚀
 
@@ -11,9 +11,13 @@ A lightweight, production-quality, zero-maintenance desktop calendar dashboard f
 - **Contest Time Collision Checking**: Cell colors reflect scheduling:
   - **Blue**: Codeforces contests only.
   - **Orange**: LeetCode contests only.
-  - **Yellow**: Both platforms on the same day (different times).
+  - **Green**: Both platforms on the same day (different times).
   - **Purple**: Platform schedules overlap (time collision!).
-- **Dynamic Contest List**: Displays detailed contest information occurring within the next 7 days in a clean 12-hour AM/PM format.
+- **Dynamic Contest List**: Displays detailed contest information occurring within the next 7 days in a clean 12-hour AM/PM format (scrollable up to 4 visible slots).
+- **Daily POTD & Streak Reminders (New in v2.0)**: A checkbox checklist (`LC`, `GFG`, `CF`) inside a dedicated rounded panel card to track whether you completed today's **Problem of the Day** or maintained your streak.
+- **Automated Checkbox Reset Schedules (New in v2.0)**: Checkbox reminders automatically untick once a day:
+  - **GFG Checkbox**: Resets at **12:00 AM (midnight)** local time.
+  - **LC & CF Checkboxes**: Reset at **5:30 AM** local time.
 - **Zero Maintenance / No Background Processes**: Fetches only once when Windows starts or when you press the refresh button. The skin remains static, consuming zero background CPU/RAM.
 
 ---
@@ -71,6 +75,6 @@ To fetch and update contest schedules automatically every time you log in to Win
    Rainmeter Lua   ◄─── (CPDashboard.lua parses JSON and updates cells)
          │
          ▼
-   Rainmeter Skin  ◄─── (Visual presentation & interactive legend/refresh)
+   Rainmeter Skin  ◄─── (Visual presentation & interactive legend/refresh/POTD reminders)
 ```
 *Rainmeter never connects directly to the internet to query contest details, preventing UI freezes.*
