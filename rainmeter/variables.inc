@@ -7,11 +7,8 @@ ColorTextPrimary=201,209,217
 ColorTextSecondary=139,148,158
 
 ; Contest State Colors
-ColorCF=88,166,255
 ColorLC=240,136,62
 ColorGFG=48,142,77
-ColorGreen=46,160,67
-ColorPurple=188,140,255
 ColorCellDefault=33,38,45
 ColorTodayBorder=240,246,252
 
@@ -36,8 +33,7 @@ FetcherPath=D:\Projects\CPDashboard\fetch\fetch_contests.py
 ; Platform Filter States (1 = Checked/Show, 0 = Unchecked/Hide)
 ShowLC=1
 ShowGFG=1
-ShowCF=1
 
 ; Autoreset Timestamps (Tracks last date reset was applied)
-LastResetDateLC_CF=
+LastResetDateLC=
 LastResetDateGFG=

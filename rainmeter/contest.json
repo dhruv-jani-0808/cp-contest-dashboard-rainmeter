@@ -1,67 +1,46 @@
 {
-  "last_updated": "2026-07-27T20:40:18.693035+05:30",
+  "last_updated": "2026-08-24T09:02:31.621409+05:30",
   "contests": [
     {
-      "id": "cf-2248",
-      "platform": "codeforces",
-      "name": "Codeforces Round 1113 (Div. 2)",
-      "start_time": "2026-08-01T17:05:00+05:30",
-      "duration": 7200
-    },
-    {
-      "id": "lc-biweekly-149",
+      "id": "lc-biweekly-151",
       "platform": "leetcode",
-      "name": "Biweekly Contest 149",
-      "start_time": "2026-08-01T20:00:00+05:30",
+      "name": "Biweekly Contest 151",
+      "start_time": "2026-08-29T20:00:00+05:30",
       "duration": 5400
     },
     {
-      "id": "lc-weekly-434",
+      "id": "lc-weekly-438",
       "platform": "leetcode",
-      "name": "Weekly Contest 434",
-      "start_time": "2026-08-02T08:00:00+05:30",
+      "name": "Weekly Contest 438",
+      "start_time": "2026-08-30T08:00:00+05:30",
       "duration": 5400
     },
     {
-      "id": "cf-2252",
-      "platform": "codeforces",
-      "name": "Codeforces Round (Div. 2)",
-      "start_time": "2026-08-06T20:05:00+05:30",
-      "duration": 7200
-    },
-    {
-      "id": "cf-2253",
-      "platform": "codeforces",
-      "name": "Educational Codeforces Round 193 (Rated for Div. 2)",
-      "start_time": "2026-08-06T20:05:00+05:30",
-      "duration": 7200
-    },
-    {
-      "id": "lc-weekly-435",
+      "id": "lc-weekly-439",
       "platform": "leetcode",
-      "name": "Weekly Contest 435",
-      "start_time": "2026-08-09T08:00:00+05:30",
+      "name": "Weekly Contest 439",
+      "start_time": "2026-09-06T08:00:00+05:30",
       "duration": 5400
     },
     {
-      "id": "lc-biweekly-150",
+      "id": "lc-biweekly-152",
       "platform": "leetcode",
-      "name": "Biweekly Contest 150",
-      "start_time": "2026-08-15T20:00:00+05:30",
+      "name": "Biweekly Contest 152",
+      "start_time": "2026-09-12T20:00:00+05:30",
       "duration": 5400
     },
     {
-      "id": "lc-weekly-436",
+      "id": "lc-weekly-440",
       "platform": "leetcode",
-      "name": "Weekly Contest 436",
-      "start_time": "2026-08-16T08:00:00+05:30",
+      "name": "Weekly Contest 440",
+      "start_time": "2026-09-13T08:00:00+05:30",
       "duration": 5400
     },
     {
-      "id": "lc-weekly-437",
+      "id": "lc-weekly-441",
       "platform": "leetcode",
-      "name": "Weekly Contest 437",
-      "start_time": "2026-08-23T08:00:00+05:30",
+      "name": "Weekly Contest 441",
+      "start_time": "2026-09-20T08:00:00+05:30",
       "duration": 5400
     }
   ]

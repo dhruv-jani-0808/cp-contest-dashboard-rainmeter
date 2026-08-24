@@ -41,9 +41,8 @@ def main():
             return 1
 
     # Live Mode
-    print("Fetching Codeforces contests...")
-    cf_contests = codeforces.fetch_upcoming_contests()
-    print(f"Retrieved {len(cf_contests)} upcoming Codeforces contests.")
+    print("Skipping Codeforces (disabled)...")
+    cf_contests = []
 
     print("Fetching LeetCode contests...")
     lc_contests = leetcode.fetch_upcoming_contests()

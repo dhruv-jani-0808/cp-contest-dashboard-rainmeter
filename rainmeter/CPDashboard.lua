@@ -50,10 +50,10 @@ function UpdateSkin()
     local today_time = os.time()
     
     -- DUAL DAILY RESET LOGIC
-    -- 1. LC & CF Reset: boundary is 5:30 AM (subtract 5.5 hours = 19800 seconds)
-    local adjusted_lc_cf_time = today_time - 19800
-    local effective_lc_cf = os.date("%Y-%m-%d", adjusted_lc_cf_time)
-    local last_reset_lc_cf = SKIN:GetVariable('LastResetDateLC_CF') or ""
+    -- 1. LC Reset: boundary is 5:30 AM (subtract 5.5 hours = 19800 seconds)
+    local adjusted_lc_time = today_time - 19800
+    local effective_lc = os.date("%Y-%m-%d", adjusted_lc_time)
+    local last_reset_lc = SKIN:GetVariable('LastResetDateLC') or ""
     
     -- 2. GFG Reset: boundary is 12:00 AM midnight (no offset needed)
     local effective_gfg = os.date("%Y-%m-%d", today_time)
@@ -61,10 +61,9 @@ function UpdateSkin()
     
     local needs_write = false
     
-    if last_reset_lc_cf ~= effective_lc_cf then
+    if last_reset_lc ~= effective_lc then
         SKIN:Bang('!WriteKeyValue', 'Variables', 'ShowLC', '0', variablesPath)
-        SKIN:Bang('!WriteKeyValue', 'Variables', 'ShowCF', '0', variablesPath)
-        SKIN:Bang('!WriteKeyValue', 'Variables', 'LastResetDateLC_CF', effective_lc_cf, variablesPath)
+        SKIN:Bang('!WriteKeyValue', 'Variables', 'LastResetDateLC', effective_lc, variablesPath)
         needs_write = true
     end
     
@@ -92,20 +91,16 @@ function UpdateSkin()
     end
     
     -- Read checkbox states from Rainmeter
-    local showCF = tonumber(SKIN:GetVariable('ShowCF')) or 1
     local showLC = tonumber(SKIN:GetVariable('ShowLC')) or 1
     local showGFG = tonumber(SKIN:GetVariable('ShowGFG')) or 1
     
     -- Update visual styles of the checkboxes (purely standalone UI)
-    local cfColor = (showCF == 1) and SKIN:GetVariable('ColorCF') or SKIN:GetVariable('ColorCellDefault')
     local lcColor = (showLC == 1) and SKIN:GetVariable('ColorLC') or SKIN:GetVariable('ColorCellDefault')
     local gfgColor = (showGFG == 1) and SKIN:GetVariable('ColorGFG') or SKIN:GetVariable('ColorCellDefault')
     
-    SKIN:Bang('!SetOption', 'MeterCFBox', 'Shape', string.format("Rectangle 0,0,12,12,2 | Fill Color %s | Stroke Color #ColorBorder# | StrokeWidth 1", cfColor))
     SKIN:Bang('!SetOption', 'MeterLCBox', 'Shape', string.format("Rectangle 0,0,12,12,2 | Fill Color %s | Stroke Color #ColorBorder# | StrokeWidth 1", lcColor))
     SKIN:Bang('!SetOption', 'MeterGFGBox', 'Shape', string.format("Rectangle 0,0,12,12,2 | Fill Color %s | Stroke Color #ColorBorder# | StrokeWidth 1", gfgColor))
     
-    SKIN:Bang('!UpdateMeter', 'MeterCFBox')
     SKIN:Bang('!UpdateMeter', 'MeterLCBox')
     SKIN:Bang('!UpdateMeter', 'MeterGFGBox')
 
@@ -144,46 +139,8 @@ function UpdateSkin()
             
             -- Determine state
             local state = "default"
-            if #date_contests == 1 then
-                state = date_contests[1].platform
-            elseif #date_contests >= 2 then
-                local has_cf = false
-                local has_lc = false
-                for _, contest in ipairs(date_contests) do
-                    if contest.platform == "codeforces" then has_cf = true end
-                    if contest.platform == "leetcode" then has_lc = true end
-                end
-                
-                if has_cf and has_lc then
-                    -- Check if any CF and LC contests collide in time (overlap)
-                    local same_time = false
-                    for i = 1, #date_contests do
-                        for j = i + 1, #date_contests do
-                            local c1 = date_contests[i]
-                            local c2 = date_contests[j]
-                            if c1.platform ~= c2.platform then
-                                local start1 = c1.timestamp
-                                local end1 = c1.timestamp + c1.duration
-                                local start2 = c2.timestamp
-                                local end2 = c2.timestamp + c2.duration
-                                
-                                -- Check interval overlap: max(start1, start2) < min(end1, end2)
-                                local max_start = math.max(start1, start2)
-                                local min_end = math.min(end1, end2)
-                                if max_start < min_end then
-                                    same_time = true
-                                    break
-                                end
-                            end
-                        end
-                        if same_time then break end
-                    end
-                    state = same_time and "purple" or "green"
-                elseif has_cf then
-                    state = "cf"
-                else
-                    state = "lc"
-                end
+            if #date_contests >= 1 then
+                state = "leetcode"
             end
             
             -- Apply cell style
@@ -191,17 +148,8 @@ function UpdateSkin()
             local fillColor = SKIN:GetVariable('ColorCellDefault')
             local textColor = SKIN:GetVariable('ColorTextSecondary')
             
-            if state == "codeforces" or state == "cf" then
-                fillColor = SKIN:GetVariable('ColorCF')
-                textColor = "13,17,23"
-            elseif state == "leetcode" or state == "lc" then
+            if state == "leetcode" then
                 fillColor = SKIN:GetVariable('ColorLC')
-                textColor = "13,17,23"
-            elseif state == "green" then
-                fillColor = SKIN:GetVariable('ColorGreen')
-                textColor = "13,17,23"
-            elseif state == "purple" then
-                fillColor = SKIN:GetVariable('ColorPurple')
                 textColor = "13,17,23"
             end
             
@@ -293,7 +241,7 @@ function UpdateSkin()
                 SKIN:Bang('!ShowMeter', timeMeter)
                 
                 -- Set platform icon
-                local iconName = "assets/" .. (contest.platform == "codeforces" and "cf.png" or "lc.png")
+                local iconName = "assets/lc.png"
                 SKIN:Bang('!SetOption', iconMeter, 'ImageName', iconName)
                 
                 -- Set text and subtitle
