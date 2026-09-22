@@ -1,7 +1,7 @@
 """
-CP Dashboard - CallMeBot Daily POTD / Streak Reminder Script.
+CP Dashboard - Ntfy.sh Daily POTD / Streak Reminder Script.
 Checks if ShowLC or ShowGFG checkboxes are unticked (0) in variables.inc,
-and sends a WhatsApp message (8:00 PM) or triggers a CallMeBot Voice Call (10:00 PM).
+and sends an instant phone push notification (8:00 PM) or an urgent loud alarm alert (10:00 PM) via Ntfy.sh.
 """
 
 import sys
@@ -28,57 +28,33 @@ def load_variables(filepath):
                     vars_dict[key.strip()] = val.strip()
     return vars_dict
 
-def send_whatsapp(phone, text, apikey):
-    if not phone or phone == "+91XXXXXXXXXX" or not apikey or apikey == "XXXXXX":
-        print("[-] Skipping WhatsApp: UserPhoneNumber or CallMeBotApiKey not configured in variables.inc.")
-        return False
+def send_ntfy_notification(topic, title, message, priority="3", tags="warning"):
+    if not topic:
+        topic = "dhruv_potd_streak"
         
-    encoded_text = urllib.parse.quote(text)
-    url = f"https://api.callmebot.com/whatsapp.php?phone={urllib.parse.quote(phone)}&text={encoded_text}&apikey={urllib.parse.quote(apikey)}"
+    url = f"https://ntfy.sh/{urllib.parse.quote(topic)}"
+    
+    headers = {
+        "Title": title,
+        "Priority": str(priority),
+        "Tags": tags,
+        "User-Agent": "CPDashboard-Reminder/2.1"
+    }
+    
+    data = message.encode('utf-8')
+    req = urllib.request.Request(url, data=data, headers=headers, method="POST")
     
     try:
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
         with urllib.request.urlopen(req, timeout=15) as response:
             res = response.read().decode('utf-8')
-            print(f"[+] WhatsApp Notification Sent Successfully: {res}")
+            print(f"[+] Ntfy.sh Notification Sent Successfully (Topic: {topic}): {res}")
             return True
     except Exception as e:
-        print(f"[-] Error sending WhatsApp alert: {e}")
+        print(f"[-] Error sending Ntfy.sh alert: {e}")
         return False
-
-def trigger_phone_call(phone, text, apikey):
-    if not phone or phone == "+91XXXXXXXXXX":
-        print("[-] Skipping Phone Call: UserPhoneNumber not configured in variables.inc.")
-        return False
-        
-    encoded_text = urllib.parse.quote(text)
-    
-    # Primary endpoint for CallMeBot Call API
-    url = f"https://api.callmebot.com/start.php?user={urllib.parse.quote(phone)}&text={encoded_text}&lang=en-US"
-    
-    # Secondary fallback endpoint
-    fallback_url = f"https://api.callmebot.com/call.php?phone={urllib.parse.quote(phone)}&text={encoded_text}&apikey={urllib.parse.quote(apikey)}"
-    
-    try:
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        with urllib.request.urlopen(req, timeout=15) as response:
-            res = response.read().decode('utf-8')
-            print(f"[+] Phone Call Triggered Successfully: {res}")
-            return True
-    except Exception as e:
-        print(f"[!] Primary call endpoint failed ({e}), trying fallback...")
-        try:
-            req = urllib.request.Request(fallback_url, headers={'User-Agent': 'Mozilla/5.0'})
-            with urllib.request.urlopen(req, timeout=15) as response:
-                res = response.read().decode('utf-8')
-                print(f"[+] Fallback Phone Call Triggered Successfully: {res}")
-                return True
-        except Exception as e2:
-            print(f"[-] Error triggering phone call: {e2}")
-            return False
 
 def main():
-    parser = argparse.ArgumentParser(description="Check CP Dashboard POTD streak reminders.")
+    parser = argparse.ArgumentParser(description="Check CP Dashboard POTD streak reminders via Ntfy.sh.")
     parser.add_argument("--type", choices=["whatsapp", "call"], default="whatsapp", help="Type of reminder to send.")
     args = parser.parse_args()
 
@@ -87,7 +63,6 @@ def main():
     
     # Also check the OneDrive active skins directory if local doesn't exist
     if not os.path.exists(variables_path):
-        appdata = os.environ.get('APPDATA', '')
         onedrive_doc = os.path.expanduser('~/OneDrive/Documents/Rainmeter/Skins/CPDashboard/variables.inc')
         if os.path.exists(onedrive_doc):
             variables_path = onedrive_doc
@@ -96,10 +71,9 @@ def main():
     
     show_lc = config.get("ShowLC", "1")
     show_gfg = config.get("ShowGFG", "1")
-    phone = config.get("UserPhoneNumber", "")
-    apikey = config.get("CallMeBotApiKey", "")
+    ntfy_topic = config.get("NtfyTopic", "dhruv_potd_streak")
     
-    print(f"[{datetime.now().isoformat()}] Checking POTD streak state...")
+    print(f"[{datetime.now().isoformat()}] Checking POTD streak state for Ntfy.sh (Topic: {ntfy_topic})...")
     print(f"    - ShowLC: {show_lc}, ShowGFG: {show_gfg}")
     
     # Check if either checkbox is unticked (0)
@@ -111,14 +85,17 @@ def main():
             unticked_list.append("GFG")
             
         platforms_str = " and ".join(unticked_list)
-        reminder_text = f"⚠️ POTD Streak Alert! You have not completed your {platforms_str} problem of the day today!"
         
         if args.type == "whatsapp":
-            print(f"[+] Sending 8:00 PM WhatsApp reminder for {platforms_str}...")
-            send_whatsapp(phone, reminder_text, apikey)
+            title = "⚠️ POTD Reminder (8:00 PM)"
+            message = f"You haven't completed your {platforms_str} problem of the day today!"
+            print(f"[+] Sending 8:00 PM Ntfy alert for {platforms_str}...")
+            send_ntfy_notification(ntfy_topic, title, message, priority="3", tags="warning,memo")
         elif args.type == "call":
-            print(f"[+] Triggering 10:00 PM Phone Call TTS voice reminder for {platforms_str}...")
-            trigger_phone_call(phone, reminder_text, apikey)
+            title = "🚨 URGENT POTD STREAK ALERT (10:00 PM)"
+            message = f"URGENT: Complete your {platforms_str} problem of the day before midnight!"
+            print(f"[+] Sending 10:00 PM Urgent Loud Alarm alert for {platforms_str}...")
+            send_ntfy_notification(ntfy_topic, title, message, priority="5", tags="rotating_light,alarm")
     else:
         print("[+] Both LC and GFG daily tasks are checked (1). No reminder needed!")
 

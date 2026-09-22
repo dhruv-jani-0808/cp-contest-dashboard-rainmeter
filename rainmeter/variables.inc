@@ -38,6 +38,5 @@ ShowGFG=1
 LastResetDateLC=
 LastResetDateGFG=
 
-; CallMeBot Reminder Configuration (For 8:00 PM WhatsApp & 10:00 PM Phone Call alerts)
-UserPhoneNumber=+91XXXXXXXXXX
-CallMeBotApiKey=XXXXXX
+; Ntfy.sh Phone Push Notification Channel Topic
+NtfyTopic=dhruv_potd_streak
