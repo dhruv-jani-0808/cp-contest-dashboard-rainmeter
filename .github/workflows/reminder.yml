@@ -1,0 +1,46 @@
+name: 24/7 Daily POTD Cloud Reminders
+
+on:
+  schedule:
+    # 8:00 PM IST = 14:30 UTC
+    - cron: '30 14 * * *'
+    # 10:00 PM IST = 16:30 UTC
+    - cron: '30 16 * * *'
+  workflow_dispatch:
+    inputs:
+      reminder_type:
+        description: 'Type of reminder to test'
+        required: true
+        default: 'whatsapp'
+        type: choice
+        options:
+          - whatsapp
+          - call
+
+jobs:
+  check-reminders:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Run Cloud Reminder Checker
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TYPE="${{ github.event.inputs.reminder_type }}"
+          else
+            UTC_HOUR=$(date -u +%H)
+            if [ "$UTC_HOUR" -eq 14 ]; then
+              TYPE="whatsapp"
+            else
+              TYPE="call"
+            fi
+          fi
+          echo "Executing Cloud Reminder Checker with type: $TYPE"
+          python fetch/check_cloud_reminders.py --type $TYPE
