@@ -37,3 +37,7 @@ ShowGFG=1
 ; Autoreset Timestamps (Tracks last date reset was applied)
 LastResetDateLC=
 LastResetDateGFG=
+
+; CallMeBot Reminder Configuration (For 8:00 PM WhatsApp & 10:00 PM Phone Call alerts)
+UserPhoneNumber=+91XXXXXXXXXX
+CallMeBotApiKey=XXXXXX

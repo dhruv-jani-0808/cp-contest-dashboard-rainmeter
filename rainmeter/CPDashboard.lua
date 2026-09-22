@@ -1,7 +1,7 @@
 -- CP Dashboard Lua Controller
 -- Handles dynamic JSON parsing, week-aligned calendar shifting, contest list formatting,
 -- time-based contest expiration, scrolling (up to 4 items visible), visual checkbox styling,
--- and dual timezone-based daily resets (midnight for GFG, 5:30 AM for LC & CF).
+-- dual timezone-based daily resets (midnight for GFG, 5:30 AM for LC), and 100% dynamic LeetCode generation.
 
 local scrollOffset = 0
 
@@ -14,16 +14,79 @@ function Update()
     -- No continuous updates on every tick. The skin remains static.
 end
 
+function generate_dynamic_leetcode_contests(monday_time)
+    local contests = {}
+    -- Anchors:
+    -- Saturday, July 18, 2026: Biweekly Contest 148 (20:00:00)
+    -- Sunday, July 19, 2026: Weekly Contest 432 (08:00:00)
+    local biweekly_anchor = os.time({year=2026, month=7, day=18, hour=20, min=0, sec=0})
+    local biweekly_num = 148
+    
+    local weekly_anchor = os.time({year=2026, month=7, day=19, hour=8, min=0, sec=0})
+    local weekly_num = 432
+    
+    for i = 0, 27 do
+        local cell_time = monday_time + (i * 24 * 3600)
+        local cell_date = os.date("*t", cell_time)
+        
+        -- Saturday (wday == 7 in Lua: Sun=1, Mon=2, Tue=3, Wed=4, Thu=5, Fri=6, Sat=7)
+        if cell_date.wday == 7 then
+            local sat_eight_pm = os.time({
+                year = cell_date.year, month = cell_date.month, day = cell_date.day,
+                hour = 20, min = 0, sec = 0
+            })
+            local days_diff = math.floor((sat_eight_pm - biweekly_anchor) / (24 * 3600) + 0.5)
+            local weeks_diff = math.floor(days_diff / 7)
+            
+            if weeks_diff % 2 == 0 then
+                local contest_num = biweekly_num + math.floor(weeks_diff / 2)
+                local start_iso = string.format("%04d-%02d-%02dT20:00:00", cell_date.year, cell_date.month, cell_date.day)
+                table.insert(contests, {
+                    id = string.format("lc-biweekly-%d", contest_num),
+                    platform = "leetcode",
+                    name = string.format("Biweekly Contest %d", contest_num),
+                    start_time = start_iso,
+                    duration = 5400,
+                    timestamp = sat_eight_pm
+                })
+            end
+            
+        -- Sunday (wday == 1 in Lua)
+        elseif cell_date.wday == 1 then
+            local sun_eight_am = os.time({
+                year = cell_date.year, month = cell_date.month, day = cell_date.day,
+                hour = 8, min = 0, sec = 0
+            })
+            local days_diff = math.floor((sun_eight_am - weekly_anchor) / (24 * 3600) + 0.5)
+            local weeks_diff = math.floor(days_diff / 7)
+            local contest_num = weekly_num + weeks_diff
+            
+            local start_iso = string.format("%04d-%02d-%02dT08:00:00", cell_date.year, cell_date.month, cell_date.day)
+            table.insert(contests, {
+                id = string.format("lc-weekly-%d", contest_num),
+                platform = "leetcode",
+                name = string.format("Weekly Contest %d", contest_num),
+                start_time = start_iso,
+                duration = 5400,
+                timestamp = sun_eight_am
+            })
+        end
+    end
+    return contests
+end
+
 function ScrollDown()
-    local currentPath = SKIN:GetVariable('CURRENTPATH')
-    local jsonPath = currentPath .. 'contest.json'
-    local jsonStr = read_file(jsonPath)
-    if not jsonStr then return end
-    
-    local data = parse_json(jsonStr)
-    if not data then return end
-    
-    local active_contests = get_active_contests(data.contests)
+    local today_time = os.time()
+    local today_date = os.date("*t", today_time)
+    local wday = today_date.wday
+    local days_since_monday = (wday == 1) and 6 or (wday - 2)
+    local monday_midnight = os.time({
+        year = today_date.year, month = today_date.month, day = today_date.day,
+        hour = 0, min = 0, sec = 0
+    }) - (days_since_monday * 24 * 3600)
+
+    local raw_contests = get_all_contests_merged(monday_midnight)
+    local active_contests = get_active_contests(raw_contests)
     local list_contests = get_list_contests(active_contests)
     
     local total_contests = #list_contests
@@ -45,8 +108,6 @@ end
 function UpdateSkin()
     local currentPath = SKIN:GetVariable('CURRENTPATH')
     local variablesPath = currentPath .. 'variables.inc'
-    local jsonPath = currentPath .. 'contest.json'
-    
     local today_time = os.time()
     
     -- DUAL DAILY RESET LOGIC
@@ -78,18 +139,6 @@ function UpdateSkin()
         return
     end
     
-    local jsonStr = read_file(jsonPath)
-    if not jsonStr then
-        print("CPDashboard.lua: contest.json not found.")
-        return
-    end
-    
-    local data = parse_json(jsonStr)
-    if not data then
-        print("CPDashboard.lua: Failed to parse contest.json.")
-        return
-    end
-    
     -- Read checkbox states from Rainmeter
     local showLC = tonumber(SKIN:GetVariable('ShowLC')) or 1
     local showGFG = tonumber(SKIN:GetVariable('ShowGFG')) or 1
@@ -104,21 +153,21 @@ function UpdateSkin()
     SKIN:Bang('!UpdateMeter', 'MeterLCBox')
     SKIN:Bang('!UpdateMeter', 'MeterGFGBox')
 
-    -- Filter out completed contests
-    local active_contests = get_active_contests(data.contests)
     local today_date = os.date("*t", today_time)
     
     -- Calculate Monday of the current week (Sun=1, Mon=2, ..., Sat=7)
     local wday = today_date.wday
     local days_since_monday = (wday == 1) and 6 or (wday - 2)
     local monday_midnight = os.time({
-        year = today_date.year,
-        month = today_date.month,
-        day = today_date.day,
+        year = today_date.year, month = today_date.month, day = today_date.day,
         hour = 0, min = 0, sec = 0
     }) - (days_since_monday * 24 * 3600)
 
     local today_iso = string.format("%04d-%02d-%02d", today_date.year, today_date.month, today_date.day)
+
+    -- Get dynamically generated contests + JSON file contests merged
+    local raw_contests = get_all_contests_merged(monday_midnight)
+    local active_contests = get_active_contests(raw_contests)
     
     -- 1. POPULATE 28-DAY CALENDAR GRID
     for r = 0, 3 do
@@ -197,7 +246,7 @@ function UpdateSkin()
         -- Find nearest upcoming active contest
         local nearest = nil
         for _, contest in ipairs(active_contests) do
-            if contest.timestamp >= today_midnight_time then
+            if contest.timestamp >= today_time then
                 nearest = contest
                 break
             end
@@ -216,7 +265,7 @@ function UpdateSkin()
         scrollOffset = 0
     end
     
-    -- We support up to 4 visible meters in INI now
+    -- We support up to 4 visible meters in INI
     local max_meters = 4
     for i = 1, max_meters do
         local iconMeter = string.format("MeterC%dIcon", i)
@@ -268,6 +317,34 @@ function UpdateSkin()
     SKIN:Bang('!Redraw')
 end
 
+function get_all_contests_merged(monday_time)
+    local dynamic = generate_dynamic_leetcode_contests(monday_time)
+    local currentPath = SKIN:GetVariable('CURRENTPATH')
+    local jsonPath = currentPath .. 'contest.json'
+    local jsonStr = read_file(jsonPath)
+    
+    if jsonStr then
+        local data = parse_json(jsonStr)
+        if data and data.contests then
+            for _, c in ipairs(data.contests) do
+                local exists = false
+                for _, d in ipairs(dynamic) do
+                    if d.id == c.id or d.start_time == c.start_time then
+                        exists = true
+                        break
+                    end
+                end
+                if not exists then
+                    table.insert(dynamic, c)
+                end
+            end
+        end
+    end
+    
+    table.sort(dynamic, function(a, b) return a.timestamp < b.timestamp end)
+    return dynamic
+end
+
 function get_active_contests(contests)
     local current_time = os.time()
     local active = {}
@@ -284,9 +361,7 @@ function get_list_contests(active_contests)
     local today_time = os.time()
     local today_date = os.date("*t", today_time)
     local today_midnight_time = os.time({
-        year = today_date.year,
-        month = today_date.month,
-        day = today_date.day,
+        year = today_date.year, month = today_date.month, day = today_date.day,
         hour = 0, min = 0, sec = 0
     })
     local seven_days_later_time = today_midnight_time + (8 * 24 * 3600) - 1
@@ -327,7 +402,6 @@ function parse_json(json_str)
             local start_time = block:match('"start_time"%s*:%s*"([^"]+)"')
             local duration_str = block:match('"duration"%s*:%s*(%d+)')
             if platform and name and start_time then
-                -- Parse timestamp during load
                 local cy, cm, cd, ch, cmin, cs = start_time:match("(%d+)-(%d+)-(%d+)T(%d+):(%d+):(%d+)")
                 local timestamp = 0
                 if cy then
