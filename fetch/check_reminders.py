@@ -11,6 +11,46 @@ import urllib.request
 import urllib.parse
 from datetime import datetime
 
+# Reconfigure stdout to handle UTF-8 characters safely on Windows CMD/PowerShell
+if hasattr(sys.stdout, 'reconfigure'):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
+
+def find_variables_path():
+    """
+    Finds the active Rainmeter skins folder's variables.inc first,
+    where Rainmeter writes live checkbox clicks.
+    """
+    # 1. Try reading Rainmeter.ini to get active SkinPath
+    appdata = os.environ.get('APPDATA', '')
+    ini_path = os.path.join(appdata, 'Rainmeter', 'Rainmeter.ini')
+    if os.path.exists(ini_path):
+        try:
+            with open(ini_path, 'r', encoding='utf-8', errors='ignore') as f:
+                for line in f:
+                    if line.strip().startswith('SkinPath='):
+                        skin_dir = line.strip().split('=', 1)[1].strip()
+                        active_vars = os.path.join(skin_dir, 'CPDashboard', 'variables.inc')
+                        if os.path.exists(active_vars):
+                            return active_vars
+        except Exception:
+            pass
+
+    # 2. Check OneDrive / User Documents path
+    onedrive_vars = os.path.expanduser('~/OneDrive/Documents/Rainmeter/Skins/CPDashboard/variables.inc')
+    if os.path.exists(onedrive_vars):
+        return onedrive_vars
+
+    doc_vars = os.path.expanduser('~/Documents/Rainmeter/Skins/CPDashboard/variables.inc')
+    if os.path.exists(doc_vars):
+        return doc_vars
+
+    # 3. Fallback to local repo directory
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    return os.path.normpath(os.path.join(script_dir, "../rainmeter/variables.inc"))
+
 def load_variables(filepath):
     """
     Parses key-value pairs from Rainmeter variables.inc file.
@@ -34,11 +74,14 @@ def send_ntfy_notification(topic, title, message, priority="3", tags="warning"):
         
     url = f"https://ntfy.sh/{urllib.parse.quote(topic)}"
     
+    # Ensure header values are ASCII safe for urllib
+    safe_title = title.encode('ascii', 'ignore').decode('ascii')
+    
     headers = {
-        "Title": title,
+        "Title": safe_title,
         "Priority": str(priority),
         "Tags": tags,
-        "User-Agent": "CPDashboard-Reminder/2.1"
+        "User-Agent": "CPDashboard-Reminder/2.2"
     }
     
     data = message.encode('utf-8')
@@ -58,22 +101,14 @@ def main():
     parser.add_argument("--type", choices=["whatsapp", "call"], default="whatsapp", help="Type of reminder to send.")
     args = parser.parse_args()
 
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    variables_path = os.path.normpath(os.path.join(script_dir, "../rainmeter/variables.inc"))
-    
-    # Also check the OneDrive active skins directory if local doesn't exist
-    if not os.path.exists(variables_path):
-        onedrive_doc = os.path.expanduser('~/OneDrive/Documents/Rainmeter/Skins/CPDashboard/variables.inc')
-        if os.path.exists(onedrive_doc):
-            variables_path = onedrive_doc
-            
+    variables_path = find_variables_path()
     config = load_variables(variables_path)
     
     show_lc = config.get("ShowLC", "1")
     show_gfg = config.get("ShowGFG", "1")
     ntfy_topic = config.get("NtfyTopic", "dhruv_potd_streak")
     
-    print(f"[{datetime.now().isoformat()}] Checking POTD streak state for Ntfy.sh (Topic: {ntfy_topic})...")
+    print(f"[{datetime.now().isoformat()}] Reading config from: {variables_path}")
     print(f"    - ShowLC: {show_lc}, ShowGFG: {show_gfg}")
     
     # Check if either checkbox is unticked (0)
@@ -87,12 +122,12 @@ def main():
         platforms_str = " and ".join(unticked_list)
         
         if args.type == "whatsapp":
-            title = "⚠️ POTD Reminder (8:00 PM)"
+            title = "POTD Streak Reminder (8:00 PM)"
             message = f"You haven't completed your {platforms_str} problem of the day today!"
             print(f"[+] Sending 8:00 PM Ntfy alert for {platforms_str}...")
             send_ntfy_notification(ntfy_topic, title, message, priority="3", tags="warning,memo")
         elif args.type == "call":
-            title = "🚨 URGENT POTD STREAK ALERT (10:00 PM)"
+            title = "URGENT POTD STREAK ALERT (10:00 PM)"
             message = f"URGENT: Complete your {platforms_str} problem of the day before midnight!"
             print(f"[+] Sending 10:00 PM Urgent Loud Alarm alert for {platforms_str}...")
             send_ntfy_notification(ntfy_topic, title, message, priority="5", tags="rotating_light,alarm")
