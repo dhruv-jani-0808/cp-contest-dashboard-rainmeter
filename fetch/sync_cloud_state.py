@@ -1,7 +1,7 @@
 """
 CP Dashboard - Cloud State Synchronizer.
 Reads live ShowLC and ShowGFG checkbox states from the active Rainmeter skin
-and uploads them to Ntfy.sh's state bucket.
+and uploads them to Ntfy.sh's state bucket with 24h cache.
 """
 
 import sys
@@ -82,17 +82,18 @@ def sync_to_cloud():
     headers = {
         "Title": "state_update",
         "Tags": "state",
-        "User-Agent": "CPDashboard-StateSync/2.2"
+        "Cache": "yes",
+        "User-Agent": "CPDashboard-StateSync/2.3"
     }
     req = urllib.request.Request(STATE_URL, data=data, headers=headers, method="POST")
     
     try:
         with urllib.request.urlopen(req, timeout=10) as response:
-            res = response.read().decode('utf-8')
-            print(f"[+] Ntfy Cloud State Sync Successful: Date={today_date}, LC={show_lc}, GFG={show_gfg}")
+            response.read()
+            print(f"[+] Cloud State Sync OK: Date={today_date}, LC={show_lc}, GFG={show_gfg}")
             return True
     except Exception as e:
-        print(f"[-] Error uploading cloud sync state: {e}")
+        print(f"[-] Cloud sync error: {e}")
         return False
 
 if __name__ == "__main__":

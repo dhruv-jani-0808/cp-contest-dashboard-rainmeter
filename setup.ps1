@@ -78,22 +78,5 @@ if (Test-Path $rainmeterPath) {
     Write-Host "[!] Rainmeter executable not found at standard path. Please refresh/load CPDashboard manually in Rainmeter Manager." -ForegroundColor Yellow
 }
 
-# 6. Register Windows Scheduled Tasks for 8:00 PM WhatsApp and 10:00 PM Phone Call reminders
-Write-Host "[+] Registering Windows Scheduled Tasks for 8:00 PM WhatsApp & 10:00 PM Call reminders..." -ForegroundColor Cyan
-try {
-    $reminderScript = Join-Path $scriptDir "fetch\check_reminders.py"
-    
-    $action8PM = New-ScheduledTaskAction -Execute $pythonPath -Argument "`"$reminderScript`" --type whatsapp"
-    $trigger8PM = New-ScheduledTaskTrigger -Daily -At 8:00PM
-    Register-ScheduledTask -TaskName "CPDashboard_8PM_WhatsApp" -Action $action8PM -Trigger $trigger8PM -User $env:USERNAME -Force | Out-Null
-    Write-Host "    - Registered task: CPDashboard_8PM_WhatsApp (Daily at 8:00 PM)" -ForegroundColor Green
-    
-    $action10PM = New-ScheduledTaskAction -Execute $pythonPath -Argument "`"$reminderScript`" --type call"
-    $trigger10PM = New-ScheduledTaskTrigger -Daily -At 10:00PM
-    Register-ScheduledTask -TaskName "CPDashboard_10PM_Call" -Action $action10PM -Trigger $trigger10PM -User $env:USERNAME -Force | Out-Null
-    Write-Host "    - Registered task: CPDashboard_10PM_Call (Daily at 10:00 PM)" -ForegroundColor Green
-} catch {
-    Write-Host "[!] Could not register Windows Scheduled Tasks automatically: $_" -ForegroundColor Yellow
-}
-
 Write-Host "`n[+] CPDashboard Setup Completed Successfully!" -ForegroundColor Green
+Write-Host "[i] POTD reminders run via GitHub Actions cloud (no local scripts needed)." -ForegroundColor Cyan

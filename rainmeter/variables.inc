@@ -35,8 +35,8 @@ ShowLC=1
 ShowGFG=1
 
 ; Autoreset Timestamps (Tracks last date reset was applied)
-LastResetDateLC=
-LastResetDateGFG=
+LastResetDateLC=2026-09-22
+LastResetDateGFG=2026-09-22
 
 ; Ntfy.sh Phone Push Notification Channel Topic
 NtfyTopic=dhruv_potd_streak
