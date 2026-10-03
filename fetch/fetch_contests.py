@@ -19,9 +19,11 @@ def main():
     parser.add_argument("--mock", action="store_true", help="Generate contest.json using mock data instead of calling APIs.")
     args = parser.parse_args()
 
-    # Determine paths
+    # Determine paths (Save to skin root where CPDashboard.lua reads it)
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    output_path = os.path.normpath(os.path.join(script_dir, "../rainmeter/contest.json"))
+    parent_dir = os.path.dirname(script_dir)
+    output_path = os.path.join(parent_dir, "contest.json")
+    dev_rainmeter_path = os.path.normpath(os.path.join(script_dir, "../rainmeter/contest.json"))
     sample_path = os.path.normpath(os.path.join(script_dir, "../tests/sample_contest.json"))
 
     print("Contest Fetcher Initialized.")
@@ -63,6 +65,8 @@ def main():
 
     if utils.save_json(output_data, output_path):
         print(f"Successfully updated contest database at {output_path}")
+        if os.path.exists(os.path.dirname(dev_rainmeter_path)) and os.path.abspath(output_path) != os.path.abspath(dev_rainmeter_path):
+            utils.save_json(output_data, dev_rainmeter_path)
         return 0
     else:
         print("Failed to save contest data.")
