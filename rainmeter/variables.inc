@@ -26,9 +26,10 @@ CellSize=34
 CellSpacing=4
 GridColumns=7
 
-; External Program Paths (For Phase 7 manual refresh)
+; External Program Paths (For Phase 7 manual refresh & cloud state sync)
 PythonPath=python
 FetcherPath=D:\Projects\CPDashboard\fetch\fetch_contests.py
+SyncPath=D:\Projects\CPDashboard\fetch\sync_cloud_state.py
 
 ; Platform Filter States (1 = Checked/Show, 0 = Unchecked/Hide)
 ShowLC=1

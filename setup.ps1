@@ -29,8 +29,14 @@ New-Item -ItemType Directory -Force -Path $destination | Out-Null
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 Copy-Item -Path (Join-Path $scriptDir "rainmeter\*") -Destination $destination -Recurse -Force
 
+# Copy fetch folder to skin destination so skin is fully self-contained
+$fetchDest = Join-Path $destination "fetch"
+New-Item -ItemType Directory -Force -Path $fetchDest | Out-Null
+Copy-Item -Path (Join-Path $scriptDir "fetch\*") -Destination $fetchDest -Recurse -Force
+
 # 3. Resolve paths for variables.inc config
-$fetcherPath = Join-Path $scriptDir "fetch\fetch_contests.py"
+$fetcherPath = Join-Path $fetchDest "fetch_contests.py"
+$syncPath = Join-Path $fetchDest "sync_cloud_state.py"
 $pythonPath = "python"
 try {
     $resolvedPython = (Get-Command python -ErrorAction SilentlyContinue).Source
@@ -42,6 +48,7 @@ try {
 Write-Host "[+] Auto-configuring paths in variables.inc..." -ForegroundColor Cyan
 Write-Host "    - Python executable: $pythonPath"
 Write-Host "    - Fetcher script: $fetcherPath"
+Write-Host "    - Sync script: $syncPath"
 
 # Read, modify, and overwrite variables.inc
 $variablesPath = Join-Path $destination "variables.inc"
@@ -52,6 +59,8 @@ foreach ($line in $variablesContent) {
         $newContent += "PythonPath=$pythonPath"
     } elseif ($line -like "FetcherPath=*") {
         $newContent += "FetcherPath=$fetcherPath"
+    } elseif ($line -like "SyncPath=*") {
+        $newContent += "SyncPath=$syncPath"
     } else {
         $newContent += $line
     }
