@@ -1,43 +1,9 @@
 [Variables]
-; Theme Colors (RGB format)
-ColorBackground=13,17,23
-ColorCard=22,27,34
-ColorBorder=48,54,61
-ColorTextPrimary=201,209,217
-ColorTextSecondary=139,148,158
-
-; Contest State Colors
-ColorLC=240,136,62
-ColorGFG=48,142,77
-ColorCellDefault=33,38,45
-ColorTodayBorder=240,246,252
-
-; Typography
-FontPrimary=Segoe UI
-FontCode=Consolas
-
-; Spacing & Dimensions
-SkinWidth=320
-SkinHeight=540
-Padding=16
-
-; Grid settings
-CellSize=34
-CellSpacing=4
-GridColumns=7
-
-; External Program Paths (For Phase 7 manual refresh & cloud state sync)
 PythonPath=python
 FetcherPath=D:\Projects\CPDashboard\fetch\fetch_contests.py
 SyncPath=D:\Projects\CPDashboard\fetch\sync_cloud_state.py
-
-; Platform Filter States (1 = Checked/Show, 0 = Unchecked/Hide)
 ShowLC=1
 ShowGFG=1
-
-; Autoreset Timestamps (Tracks last date reset was applied)
-LastResetDateLC=2026-09-22
-LastResetDateGFG=2026-09-22
-
-; Ntfy.sh Phone Push Notification Channel Topic
+LastResetDateLC=2026-10-03
+LastResetDateGFG=2026-10-03
 NtfyTopic=dhruv_potd_streak
